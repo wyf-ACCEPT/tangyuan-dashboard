@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TANGYUAN ACTIVITY LOG [LIVE]</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0a0a;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header h1 {
+            font-size: 32px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        .live-badge {
+            background: #00ff00;
+            color: #000;
+            padding: 4px 12px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 4px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: #00aa00;
+            margin-bottom: 20px;
+        }
+
+        .divider {
+            height: 2px;
+            background: #00ff00;
+            margin: 20px 0;
+        }
+
+        .log-box {
+            border: 2px solid #00ff00;
+            padding: 20px;
+            min-height: 500px;
+            background: rgba(0, 255, 0, 0.02);
+            overflow-y: auto;
+            max-height: 600px;
+        }
+
+        .log-entry {
+            margin: 8px 0;
+            padding: 8px 0;
+            border-left: 3px solid transparent;
+            padding-left: 12px;
+            transition: all 0.3s;
+        }
+
+        .log-entry:hover {
+            background: rgba(0, 255, 0, 0.1);
+            border-left-color: #00ff00;
+        }
+
+        .log-entry.loading {
+            color: #00aa00;
+            font-style: italic;
+        }
+
+        .timestamp {
+            color: #00aa00;
+            font-weight: normal;
+        }
+
+        .status-started {
+            color: #00aaff;
+        }
+
+        .status-current {
+            color: #ffff00;
+            font-weight: bold;
+        }
+
+        .status-completed {
+            color: #00ff00;
+        }
+
+        .status-error {
+            color: #ff0000;
+        }
+
+        footer {
+            margin-top: 40px;
+        }
+
+        .footer-text {
+            text-align: center;
+            font-size: 12px;
+            color: #00aa00;
+        }
+
+        .log-box::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .log-box::-webkit-scrollbar-track {
+            background: #0a0a0a;
+        }
+
+        .log-box::-webkit-scrollbar-thumb {
+            background: #00ff00;
+            border-radius: 4px;
+        }
+
+        .log-box::-webkit-scrollbar-thumb:hover {
+            background: #00aa00;
+        }
+
+        .api-status {
+            text-align: center;
+            font-size: 12px;
+            color: #00aa00;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>TANGYUAN ACTIVITY LOG <span class="live-badge">LIVE</span></h1>
+            <p class="subtitle">Real-time execution tracking | Jason Wang's AI Assistant | Warm & Round ⚪</p>
+            <div class="divider"></div>
+        </header>
+
+        <main>
+            <div id="log-container" class="log-box">
+                <div class="log-entry loading">正在连接活动日志...</div>
+            </div>
+            <p class="api-status" id="api-status">Data source: Cloudflare Worker</p>
+        </main>
+
+        <footer>
+            <div class="divider"></div>
+            <p class="footer-text">汤圆 Tangyuan | ⚪ | Auto-refresh every 10s | Powered by GitHub + Cloudflare</p>
+        </footer>
+    </div>
+
+    <script>
+        // 配置：Worker API endpoint
+        // 部署后请替换为你的 Worker URL: https://your-worker.your-subdomain.workers.dev
+        const API_ENDPOINT = 'https://tangyuan-logs.importwyf.workers.dev/logs';
+        
+        class ActivityLogger {
+            constructor() {
+                this.logContainer = document.getElementById('log-container');
+                this.apiStatus = document.getElementById('api-status');
+                this.logs = [];
+                this.init();
+            }
+
+            init() {
+                this.fetchLogs();
+                // 每10秒刷新
+                setInterval(() => this.fetchLogs(), 10000);
+            }
+
+            async fetchLogs() {
+                try {
+                    const response = await fetch(API_ENDPOINT);
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+                    const data = await response.json();
+                    this.logs = data.logs || [];
+                    this.apiStatus.textContent = `Data source: Cloudflare Worker | Last update: ${new Date().toLocaleTimeString('zh-CN')}`;
+                    this.apiStatus.style.color = '#00ff00';
+                } catch (error) {
+                    console.error('Failed to fetch logs:', error);
+                    this.apiStatus.textContent = `⚠️ Failed to connect to Worker API: ${error.message}`;
+                    this.apiStatus.style.color = '#ff0000';
+                    // 使用备用数据
+                    this.logs = this.getFallbackLogs();
+                }
+                this.render();
+            }
+
+            getFallbackLogs() {
+                const now = new Date();
+                return [
+                    {
+                        timestamp: this.formatTime(new Date(now - 3600000)),
+                        status: 'completed',
+                        message: 'System initialized'
+                    },
+                    {
+                        timestamp: this.formatTime(now),
+                        status: 'error',
+                        message: 'Unable to connect to Worker API. Please deploy the Worker first.'
+                    }
+                ];
+            }
+
+            formatTime(date) {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                const hours = String(date.getHours()).padStart(2, '0');
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+                const seconds = String(date.getSeconds()).padStart(2, '0');
+                return `${year}-${month}-${day} ${hours}:${minutes}:${seconds} UTC`;
+            }
+
+            render() {
+                if (this.logs.length === 0) {
+                    this.logContainer.innerHTML = '<div class="log-entry loading">暂无活动记录</div>';
+                    return;
+                }
+
+                this.logContainer.innerHTML = this.logs.map(log => {
+                    const statusClass = `status-${log.status}`;
+                    const statusText = this.getStatusText(log.status);
+                    return `
+                        <div class="log-entry ${statusClass}">
+                            <span class="timestamp">[${log.timestamp}]</span> 
+                            <span class="${statusClass}">${statusText}:</span> 
+                            ${log.message}
+                        </div>
+                    `;
+                }).join('');
+
+                // 滚动到底部
+                this.logContainer.scrollTop = this.logContainer.scrollHeight;
+            }
+
+            getStatusText(status) {
+                const statusMap = {
+                    'started': 'STARTED',
+                    'current': 'CURRENT',
+                    'completed': 'COMPLETED',
+                    'error': 'ERROR'
+                };
+                return statusMap[status] || 'INFO';
+            }
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            new ActivityLogger();
+        });
+    </script>
+</body>
+</html>
