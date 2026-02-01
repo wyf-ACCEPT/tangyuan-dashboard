@@ -11,19 +11,80 @@
             box-sizing: border-box;
         }
 
+        /* 主题变量 */
+        :root[data-theme="hacker"] {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: rgba(0, 255, 0, 0.02);
+            --color-primary: #00ff00;
+            --color-secondary: #00aa00;
+            --color-accent: #00ff00;
+            --border-color: #00ff00;
+            --status-started: #00aaff;
+            --status-current: #ffff00;
+            --status-completed: #00ff00;
+            --status-error: #ff0000;
+            --glow: none;
+        }
+
+        :root[data-theme="cyberpunk"] {
+            --bg-primary: #0d0221;
+            --bg-secondary: rgba(255, 0, 255, 0.05);
+            --color-primary: #ff00ff;
+            --color-secondary: #bd00ff;
+            --color-accent: #00d4ff;
+            --border-color: #ff00ff;
+            --status-started: #00d4ff;
+            --status-current: #ffff00;
+            --status-completed: #ff00ff;
+            --status-error: #ff0055;
+            --glow: 0 0 10px currentColor;
+        }
+
         body {
-            background: #0a0a0a;
-            color: #00ff00;
+            background: var(--bg-primary);
+            color: var(--color-primary);
             font-family: 'Courier New', monospace;
             font-size: 14px;
             line-height: 1.6;
             padding: 20px;
             overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Cyberpunk 扫描线效果 */
+        body[data-theme="cyberpunk"]::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(255, 0, 255, 0.03) 0px,
+                transparent 1px,
+                transparent 2px,
+                rgba(255, 0, 255, 0.03) 3px
+            );
+            pointer-events: none;
+            z-index: 1;
+            animation: scan 10s linear infinite;
+        }
+
+        @keyframes scan {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(20px); }
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+
+        header {
+            position: relative;
         }
 
         header h1 {
@@ -31,16 +92,18 @@
             font-weight: bold;
             letter-spacing: 2px;
             margin-bottom: 10px;
+            text-shadow: var(--glow);
         }
 
         .live-badge {
-            background: #00ff00;
-            color: #000;
+            background: var(--color-accent);
+            color: var(--bg-primary);
             padding: 4px 12px;
             font-size: 16px;
             font-weight: bold;
             border-radius: 4px;
             animation: pulse 2s infinite;
+            box-shadow: var(--glow);
         }
 
         @keyframes pulse {
@@ -50,23 +113,56 @@
 
         .subtitle {
             font-size: 14px;
-            color: #00aa00;
+            color: var(--color-secondary);
             margin-bottom: 20px;
+        }
+
+        .theme-switcher {
+            position: absolute;
+            top: 0;
+            right: 0;
+            display: flex;
+            gap: 8px;
+        }
+
+        .theme-btn {
+            background: transparent;
+            border: 2px solid var(--border-color);
+            color: var(--color-primary);
+            padding: 6px 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-shadow: var(--glow);
+        }
+
+        .theme-btn:hover {
+            background: var(--border-color);
+            color: var(--bg-primary);
+            box-shadow: var(--glow);
+        }
+
+        .theme-btn.active {
+            background: var(--border-color);
+            color: var(--bg-primary);
         }
 
         .divider {
             height: 2px;
-            background: #00ff00;
+            background: var(--border-color);
             margin: 20px 0;
+            box-shadow: var(--glow);
         }
 
         .log-box {
-            border: 2px solid #00ff00;
+            border: 2px solid var(--border-color);
             padding: 20px;
             min-height: 500px;
-            background: rgba(0, 255, 0, 0.02);
+            background: var(--bg-secondary);
             overflow-y: auto;
             max-height: 600px;
+            box-shadow: var(--glow);
         }
 
         .log-entry {
@@ -78,75 +174,83 @@
         }
 
         .log-entry:hover {
-            background: rgba(0, 255, 0, 0.1);
-            border-left-color: #00ff00;
+            background: var(--bg-secondary);
+            border-left-color: var(--border-color);
+            box-shadow: inset 4px 0 8px var(--border-color);
         }
 
         .log-entry.loading {
-            color: #00aa00;
+            color: var(--color-secondary);
             font-style: italic;
         }
 
         .timestamp {
-            color: #00aa00;
+            color: var(--color-secondary);
             font-weight: normal;
         }
 
         .status-started {
-            color: #00aaff;
+            color: var(--status-started);
+            text-shadow: var(--glow);
         }
 
         .status-current {
-            color: #ffff00;
+            color: var(--status-current);
             font-weight: bold;
+            text-shadow: var(--glow);
         }
 
         .status-completed {
-            color: #00ff00;
+            color: var(--status-completed);
+            text-shadow: var(--glow);
         }
 
         .status-error {
-            color: #ff0000;
+            color: var(--status-error);
+            text-shadow: var(--glow);
         }
 
         footer {
             margin-top: 40px;
         }
 
-        .footer-text {
+        .footer-text, .api-status {
             text-align: center;
             font-size: 12px;
-            color: #00aa00;
+            color: var(--color-secondary);
         }
 
+        .api-status {
+            margin-top: 10px;
+        }
+
+        /* 滚动条 */
         .log-box::-webkit-scrollbar {
             width: 8px;
         }
 
         .log-box::-webkit-scrollbar-track {
-            background: #0a0a0a;
+            background: var(--bg-primary);
         }
 
         .log-box::-webkit-scrollbar-thumb {
-            background: #00ff00;
+            background: var(--border-color);
             border-radius: 4px;
+            box-shadow: var(--glow);
         }
 
         .log-box::-webkit-scrollbar-thumb:hover {
-            background: #00aa00;
-        }
-
-        .api-status {
-            text-align: center;
-            font-size: 12px;
-            color: #00aa00;
-            margin-top: 10px;
+            background: var(--color-accent);
         }
     </style>
 </head>
-<body>
+<body data-theme="cyberpunk">
     <div class="container">
         <header>
+            <div class="theme-switcher">
+                <button class="theme-btn" data-theme="cyberpunk">CYBERPUNK</button>
+                <button class="theme-btn" data-theme="hacker">HACKER</button>
+            </div>
             <h1>TANGYUAN ACTIVITY LOG <span class="live-badge">LIVE</span></h1>
             <p class="subtitle">Real-time execution tracking | Jason Wang's AI Assistant | Warm & Round ⚪</p>
             <div class="divider"></div>
@@ -166,8 +270,32 @@
     </div>
 
     <script>
-        // 配置：Worker API endpoint
-        // 部署后请替换为你的 Worker URL: https://your-worker.your-subdomain.workers.dev
+        // 主题切换
+        const root = document.documentElement;
+        const body = document.body;
+        const themeButtons = document.querySelectorAll('.theme-btn');
+        
+        // 从 localStorage 读取主题
+        const savedTheme = localStorage.getItem('theme') || 'cyberpunk';
+        setTheme(savedTheme);
+
+        themeButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const theme = btn.dataset.theme;
+                setTheme(theme);
+                localStorage.setItem('theme', theme);
+            });
+        });
+
+        function setTheme(theme) {
+            root.setAttribute('data-theme', theme);
+            body.setAttribute('data-theme', theme);
+            themeButtons.forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.theme === theme);
+            });
+        }
+
+        // Worker API
         const API_ENDPOINT = 'https://tangyuan-logs.importwyf.workers.dev/logs';
         
         class ActivityLogger {
@@ -180,54 +308,32 @@
 
             init() {
                 this.fetchLogs();
-                // 每10秒刷新
                 setInterval(() => this.fetchLogs(), 10000);
             }
 
             async fetchLogs() {
                 try {
                     const response = await fetch(API_ENDPOINT);
-                    if (!response.ok) {
-                        throw new Error(`HTTP ${response.status}`);
-                    }
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
                     const data = await response.json();
                     this.logs = data.logs || [];
                     this.apiStatus.textContent = `Data source: Cloudflare Worker | Last update: ${new Date().toLocaleTimeString('zh-CN')}`;
-                    this.apiStatus.style.color = '#00ff00';
+                    this.apiStatus.style.color = 'var(--color-primary)';
                 } catch (error) {
                     console.error('Failed to fetch logs:', error);
-                    this.apiStatus.textContent = `⚠️ Failed to connect to Worker API: ${error.message}`;
-                    this.apiStatus.style.color = '#ff0000';
-                    // 使用备用数据
+                    this.apiStatus.textContent = `⚠️ Failed to connect: ${error.message}`;
+                    this.apiStatus.style.color = 'var(--status-error)';
                     this.logs = this.getFallbackLogs();
                 }
                 this.render();
             }
 
             getFallbackLogs() {
-                const now = new Date();
-                return [
-                    {
-                        timestamp: this.formatTime(new Date(now - 3600000)),
-                        status: 'completed',
-                        message: 'System initialized'
-                    },
-                    {
-                        timestamp: this.formatTime(now),
-                        status: 'error',
-                        message: 'Unable to connect to Worker API. Please deploy the Worker first.'
-                    }
-                ];
-            }
-
-            formatTime(date) {
-                const year = date.getFullYear();
-                const month = String(date.getMonth() + 1).padStart(2, '0');
-                const day = String(date.getDate()).padStart(2, '0');
-                const hours = String(date.getHours()).padStart(2, '0');
-                const minutes = String(date.getMinutes()).padStart(2, '0');
-                const seconds = String(date.getSeconds()).padStart(2, '0');
-                return `${year}-${month}-${day} ${hours}:${minutes}:${seconds} UTC`;
+                return [{
+                    timestamp: new Date().toISOString().slice(0,19).replace('T', ' ') + ' UTC',
+                    status: 'error',
+                    message: 'Unable to connect to Worker API'
+                }];
             }
 
             render() {
@@ -248,7 +354,6 @@
                     `;
                 }).join('');
 
-                // 滚动到底部
                 this.logContainer.scrollTop = this.logContainer.scrollHeight;
             }
 
@@ -263,7 +368,6 @@
             }
         }
 
-        // 初始化
         document.addEventListener('DOMContentLoaded', () => {
             new ActivityLogger();
         });
