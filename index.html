@@ -24,6 +24,7 @@
             --status-completed: #00ff00;
             --status-error: #ff0000;
             --glow: none;
+            --font-family: 'Courier New', monospace;
         }
 
         :root[data-theme="cyberpunk"] {
@@ -38,17 +39,34 @@
             --status-completed: #ff00ff;
             --status-error: #ff0055;
             --glow: 0 0 10px currentColor;
+            --font-family: 'Courier New', monospace;
+        }
+
+        :root[data-theme="kawaii"] {
+            --bg-primary: #fff0f5;
+            --bg-secondary: rgba(255, 182, 193, 0.1);
+            --color-primary: #ff1493;
+            --color-secondary: #ff69b4;
+            --color-accent: #ff85c1;
+            --border-color: #ffb6c1;
+            --status-started: #87ceeb;
+            --status-current: #ffd700;
+            --status-completed: #ff69b4;
+            --status-error: #ff6b9d;
+            --glow: 0 0 15px rgba(255, 105, 180, 0.5);
+            --font-family: 'Comic Sans MS', 'Arial', sans-serif;
         }
 
         body {
             background: var(--bg-primary);
             color: var(--color-primary);
-            font-family: 'Courier New', monospace;
+            font-family: var(--font-family);
             font-size: 14px;
             line-height: 1.6;
             padding: 20px;
             overflow-x: hidden;
             position: relative;
+            transition: all 0.3s ease;
         }
 
         /* Cyberpunk 扫描线效果 */
@@ -71,9 +89,29 @@
             animation: scan 10s linear infinite;
         }
 
+        /* Kawaii 飘落心心 */
+        body[data-theme="kawaii"]::before {
+            content: '💖 ✨ 🌸 💕 ⭐ 🎀 💗 🌺';
+            position: fixed;
+            top: -50px;
+            left: 0;
+            width: 100%;
+            font-size: 20px;
+            letter-spacing: 50px;
+            opacity: 0.3;
+            pointer-events: none;
+            z-index: 1;
+            animation: float 20s linear infinite;
+        }
+
         @keyframes scan {
             0% { transform: translateY(0); }
             100% { transform: translateY(20px); }
+        }
+
+        @keyframes float {
+            0% { transform: translateY(-50px); }
+            100% { transform: translateY(100vh); }
         }
 
         .container {
@@ -95,6 +133,11 @@
             text-shadow: var(--glow);
         }
 
+        [data-theme="kawaii"] header h1 {
+            font-size: 28px;
+            letter-spacing: 1px;
+        }
+
         .live-badge {
             background: var(--color-accent);
             color: var(--bg-primary);
@@ -104,6 +147,11 @@
             border-radius: 4px;
             animation: pulse 2s infinite;
             box-shadow: var(--glow);
+        }
+
+        [data-theme="kawaii"] .live-badge {
+            border-radius: 20px;
+            padding: 6px 16px;
         }
 
         @keyframes pulse {
@@ -130,17 +178,23 @@
             border: 2px solid var(--border-color);
             color: var(--color-primary);
             padding: 6px 12px;
-            font-family: 'Courier New', monospace;
+            font-family: var(--font-family);
             font-size: 12px;
             cursor: pointer;
             transition: all 0.3s;
             text-shadow: var(--glow);
         }
 
+        [data-theme="kawaii"] .theme-btn {
+            border-radius: 15px;
+            border-width: 3px;
+        }
+
         .theme-btn:hover {
             background: var(--border-color);
             color: var(--bg-primary);
             box-shadow: var(--glow);
+            transform: scale(1.05);
         }
 
         .theme-btn.active {
@@ -155,6 +209,11 @@
             box-shadow: var(--glow);
         }
 
+        [data-theme="kawaii"] .divider {
+            height: 3px;
+            border-radius: 2px;
+        }
+
         .log-box {
             border: 2px solid var(--border-color);
             padding: 20px;
@@ -163,6 +222,11 @@
             overflow-y: auto;
             max-height: 600px;
             box-shadow: var(--glow);
+        }
+
+        [data-theme="kawaii"] .log-box {
+            border-width: 3px;
+            border-radius: 15px;
         }
 
         .log-entry {
@@ -210,6 +274,12 @@
             text-shadow: var(--glow);
         }
 
+        /* Kawaii 状态文本添加emoji */
+        [data-theme="kawaii"] .status-started::before { content: '✨ '; }
+        [data-theme="kawaii"] .status-current::before { content: '⭐ '; }
+        [data-theme="kawaii"] .status-completed::before { content: '💖 '; }
+        [data-theme="kawaii"] .status-error::before { content: '💔 '; }
+
         footer {
             margin-top: 40px;
         }
@@ -242,12 +312,17 @@
         .log-box::-webkit-scrollbar-thumb:hover {
             background: var(--color-accent);
         }
+
+        [data-theme="kawaii"] .log-box::-webkit-scrollbar-thumb {
+            border-radius: 10px;
+        }
     </style>
 </head>
 <body data-theme="cyberpunk">
     <div class="container">
         <header>
             <div class="theme-switcher">
+                <button class="theme-btn" data-theme="kawaii">KAWAII 💕</button>
                 <button class="theme-btn" data-theme="cyberpunk">CYBERPUNK</button>
                 <button class="theme-btn" data-theme="hacker">HACKER</button>
             </div>
