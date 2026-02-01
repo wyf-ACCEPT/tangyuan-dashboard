@@ -89,19 +89,23 @@
             animation: scan 10s linear infinite;
         }
 
-        /* Kawaii 飘落心心 */
-        body[data-theme="kawaii"]::before {
-            content: '💖 ✨ 🌸 💕 ⭐ 🎀 💗 🌺';
+        /* Kawaii 飘落 emoji 容器 */
+        .emoji-rain {
             position: fixed;
-            top: -50px;
+            top: 0;
             left: 0;
             width: 100%;
-            font-size: 20px;
-            letter-spacing: 50px;
-            opacity: 0.3;
+            height: 100%;
             pointer-events: none;
             z-index: 1;
-            animation: float 20s linear infinite;
+            overflow: hidden;
+        }
+
+        .emoji {
+            position: absolute;
+            font-size: 20px;
+            opacity: 0.6;
+            animation: fall linear forwards;
         }
 
         @keyframes scan {
@@ -109,9 +113,15 @@
             100% { transform: translateY(20px); }
         }
 
-        @keyframes float {
-            0% { transform: translateY(-50px); }
-            100% { transform: translateY(100vh); }
+        @keyframes fall {
+            0% {
+                transform: translateY(-50px) rotate(0deg);
+                opacity: 0.6;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
         }
 
         .container {
@@ -319,6 +329,8 @@
     </style>
 </head>
 <body data-theme="cyberpunk">
+    <div class="emoji-rain" id="emoji-rain"></div>
+    
     <div class="container">
         <header>
             <div class="theme-switcher">
@@ -345,6 +357,54 @@
     </div>
 
     <script>
+        // Kawaii 主题随机飘落 emoji
+        class EmojiRain {
+            constructor() {
+                this.container = document.getElementById('emoji-rain');
+                this.emojis = ['💖', '✨', '🌸', '💕', '⭐', '🎀', '💗', '🌺', '🌟', '💫', '🦄', '🍰', '🧁', '🍓', '🌈', '☁️', '💝'];
+                this.interval = null;
+            }
+
+            start() {
+                this.stop(); // 先停止旧的
+                this.createEmoji(); // 立即创建一个
+                this.interval = setInterval(() => this.createEmoji(), 500); // 每0.5秒一个
+            }
+
+            stop() {
+                if (this.interval) {
+                    clearInterval(this.interval);
+                    this.interval = null;
+                }
+                this.container.innerHTML = ''; // 清空
+            }
+
+            createEmoji() {
+                const emoji = document.createElement('div');
+                emoji.className = 'emoji';
+                emoji.textContent = this.emojis[Math.floor(Math.random() * this.emojis.length)];
+                
+                // 随机位置和大小
+                emoji.style.left = Math.random() * 100 + '%';
+                emoji.style.fontSize = (15 + Math.random() * 15) + 'px';
+                
+                // 随机动画时长（3-6秒）
+                const duration = 3 + Math.random() * 3;
+                emoji.style.animationDuration = duration + 's';
+                
+                this.container.appendChild(emoji);
+                
+                // 动画结束后移除
+                setTimeout(() => {
+                    if (emoji.parentNode) {
+                        emoji.remove();
+                    }
+                }, duration * 1000);
+            }
+        }
+
+        const emojiRain = new EmojiRain();
+
         // 主题切换
         const root = document.documentElement;
         const body = document.body;
@@ -368,6 +428,13 @@
             themeButtons.forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.theme === theme);
             });
+            
+            // Kawaii 主题启动飘落
+            if (theme === 'kawaii') {
+                emojiRain.start();
+            } else {
+                emojiRain.stop();
+            }
         }
 
         // Worker API
