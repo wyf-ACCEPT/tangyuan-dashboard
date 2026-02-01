@@ -1,6 +1,0 @@
-name = "tangyuan-logs"
-main = "worker.js"
-compatibility_date = "2026-02-01"
-
-# Cloudflare Workers 配置
-# 这个 Worker 提供 Tangyuan 活动日志 API
